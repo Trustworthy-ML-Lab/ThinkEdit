@@ -4,7 +4,7 @@ import re
 import math
 import numpy as np
 from datasets import load_dataset, get_dataset_config_names, concatenate_datasets
-from math_grader import strip_string, math_equal
+from math_grader import math_equal, strip_string
 
 DATASET_MAP = {
     "gsm8k": {"args": ("openai/gsm8k", "main"), "question_key": "question"},
@@ -19,9 +19,11 @@ model_dict = {
     "deepseek-qwen-1.5b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
     "deepseek-llama3-8b": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
     "deepseek-qwen-14b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+    "deepseek-qwen-32b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
     "ThinkEdit-deepseek-qwen-1.5b": "cesun/ThinkEdit-deepseek-qwen-1.5b",
     "ThinkEdit-deepseek-llama3-8b": "cesun/ThinkEdit-deepseek-llama3-8b",
-    "ThinkEdit-deepseek-qwen-14b": "cesun/ThinkEdit-deepseek-qwen-14b"
+    "ThinkEdit-deepseek-qwen-14b": "cesun/ThinkEdit-deepseek-qwen-14b",
+    "ThinkEdit-deepseek-qwen-32b": "cesun/ThinkEdit-deepseek-qwen-32b"
     }
 
 def get_think_length(output_ids, think_start_id, think_end_id, max_length=8192):
@@ -34,6 +36,24 @@ def get_think_length(output_ids, think_start_id, think_end_id, max_length=8192):
         return max_length, False
     elif not think_starts and think_ends:
         return think_ends[0] + 1, False
+    else:
+        return -1, False
+
+def find_sublist_indices(lst, sublist):
+    """Find all start indices where sublist appears in lst"""
+    sub_len = len(sublist)
+    return [i for i in range(len(lst) - sub_len + 1) if lst[i:i + sub_len] == sublist]
+
+def get_think_length_s1(output_ids, think_start_id, think_end_id, max_length=8192):
+    think_starts = find_sublist_indices(output_ids, think_start_id)
+    think_ends = find_sublist_indices(output_ids, think_end_id)
+
+    if think_starts and think_ends:
+        return think_ends[0] + len(think_end_id) - think_starts[0], True
+    elif think_starts and not think_ends:
+        return max_length, False
+    elif not think_starts and think_ends:
+        return think_ends[0] + len(think_end_id), False
     else:
         return -1, False
 

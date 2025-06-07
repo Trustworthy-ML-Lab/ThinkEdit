@@ -20,7 +20,7 @@ torch.cuda.manual_seed_all(20)
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="deepseek-qwen-1.5b", choices=["deepseek-qwen-1.5b", "deepseek-llama3-8b", "deepseek-qwen-14b"])
+parser.add_argument("--model", type=str, default="deepseek-qwen-1.5b", choices=["deepseek-qwen-1.5b", "deepseek-llama3-8b", "deepseek-qwen-14b", "deepseek-qwen-32b"])
 parser.add_argument("--control", type=str, default="thinking_length_mlp", choices=["thinking_length_mlp", "thinking_length_attn"])
 parser.add_argument("--direction_weight", type=float, default=0.00)
 args = parser.parse_args()

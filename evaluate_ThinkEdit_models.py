@@ -11,7 +11,9 @@ from enum import Enum
 
 from tqdm import tqdm
 from vllm import LLM, SamplingParams
-from utils import model_dict, analyze_math_results, extract_questions, get_think_length
+from transformers import AutoConfig, GenerationConfig
+from utils import model_dict, analyze_math_results, extract_questions, get_think_length, get_think_length_s1
+
 
 # Add constants for retry configuration
 MAX_RETRIES = 5
@@ -33,130 +35,12 @@ class InferenceMode(Enum):
 server_loads = {}
 server_locks = {}
 
-async def initialize_server_tracking():
-    """Initialize the tracking dictionaries for server loads"""
-    global server_loads, server_locks
-    server_loads = {port: 0 for port in SERVER_PORTS}
-    server_locks = {port: asyncio.Lock() for port in SERVER_PORTS}
-
-async def get_next_server_url(endpoint: str="v1/chat/completions"):
+async def process_api_requests(questions: List[str], model: str, instruction: str, n_samples: int = 1) -> List[Dict]:
     """
-    Returns the URL of the server with the lowest number of pending requests.
+    Process API requests asynchronously with load balancing.
     """
-    global server_loads, server_locks
+    pass
     
-    # Find the server with minimum load
-    min_load = float('inf')
-    selected_port = None
-    
-    for port, load in server_loads.items():
-        if load < min_load:
-            min_load = load
-            selected_port = port
-    
-    # Increment the load counter for the selected server
-    async with server_locks[selected_port]:
-        server_loads[selected_port] += 1
-    
-    return f"http://localhost:{selected_port}/{endpoint}"
-
-
-async def query_llm_tokenizer_api(prompt: str, session: aiohttp.ClientSession, model: str) -> Dict:
-    url = await get_next_server_url(endpoint="v1/tokenize")
-    headers = {"Content-Type": "application/json"}
-    data = {"model": model, "prompt": prompt}
-    async with session.post(url, headers=headers, json=data) as response:
-        return await response.json()
-    
-
-async def query_llm_completion_api_with_retry(prompt: str, session: aiohttp.ClientSession, model: str, 
-                                 retry_count: int = 0) -> Dict:
-    """
-    Query the LLM API with retry mechanism and load balancing.
-    """
-    url = await get_next_server_url(endpoint="v1/completions")
-    selected_port = int(url.split(':')[2].split('/')[0])  # Extract port from URL
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "model": model,
-        "prompt": prompt,
-        "temperature": 0.6,
-        "top_p": 0.95,
-    }
-    try:
-        async with session.post(url, headers=headers, json=data) as response:
-            response.raise_for_status()
-            result = await response.json()
-            # Decrement the load counter after request completes
-            async with server_locks[selected_port]:
-                server_loads[selected_port] -= 1
-            return result
-    except Exception as e:
-        # Decrement the load counter if request fails
-        async with server_locks[selected_port]:
-            server_loads[selected_port] -= 1
-            
-        if retry_count < MAX_RETRIES:
-            delay = min(BASE_DELAY * (2 ** retry_count) + random.uniform(0, 1), MAX_DELAY)
-            print(f"Request failed on {url}: {e}. Retrying in {delay:.2f} seconds... (Attempt {retry_count + 1}/{MAX_RETRIES})")
-            await asyncio.sleep(delay)
-            return await query_llm_completion_api_with_retry(prompt, session, model, retry_count + 1)
-        else:
-            print(f"Error querying LLM API after {MAX_RETRIES} retries: {e}")
-            return None
-
-
-async def query_llm_api_with_retry(question: str, session: aiohttp.ClientSession, model: str, instruction: str, 
-                                 retry_count: int = 0, n_samples: int = 1) -> Dict:
-    """
-    Query the LLM API with retry mechanism and load balancing.
-    """
-    url = await get_next_server_url()
-    selected_port = int(url.split(':')[2].split('/')[0])  # Extract port from URL
-    
-    headers = {"Content-Type": "application/json"}
-    if instruction:
-        question = f"Question: {question} {instruction}"
-    data = {
-        "model": model,
-        "messages": [{"role": "user", "content": question}],
-        "temperature": 0.6,
-        "top_p": 0.95,
-        "n": n_samples,
-        "max_completion_tokens": MAX_RESPONSE_LENGTH
-    }
-    
-    try:
-        async with session.post(url, headers=headers, json=data) as response:
-            response.raise_for_status()
-            result = await response.json()
-            # Decrement the load counter after request completes
-            async with server_locks[selected_port]:
-                server_loads[selected_port] -= 1
-    except Exception as e:
-        # Decrement the load counter if request fails
-        async with server_locks[selected_port]:
-            server_loads[selected_port] -= 1
-            
-        if retry_count < MAX_RETRIES:
-            delay = min(BASE_DELAY * (2 ** retry_count) + random.uniform(0, 1), MAX_DELAY)
-            print(f"Request failed on {url}: {e}. Retrying in {delay:.2f} seconds... (Attempt {retry_count + 1}/{MAX_RETRIES})")
-            await asyncio.sleep(delay)
-            return await query_llm_api_with_retry(question, session, model, instruction, retry_count + 1, n_samples)
-        else:
-            print(f"Error querying LLM API after {MAX_RETRIES} retries: {e}")
-            return None
-    for choice in result["choices"]:
-        if choice.finish_reason == "length": # If truncated due to max_completion_tokens
-            completion_message = DEEPSEEK_THINK_TEMPLATE.format(q=question, i=instruction)
-            completion_message = f"<think>{completion_message}\n</think>\n\nYeah, I think that's right.\n\n**Final Answer**\n"
-            result = await query_llm_completion_api_with_retry(completion_message, session, model)
-            choice["message"]["content"] = result["choices"][0]["message"]["content"]
-        thinking_tokens = await query_llm_tokenizer_api(choice["message"]["reasoning_content"], session, model)
-        choice["message"]["thinking_length"] = len(thinking_tokens["tokens"]) + 2
-    return result
-
-
 def query_llm_offline(questions: List[str], model: str, instruction: str,
                       n_samples: int = 1, tensor_parallel_size: int = 1) -> List[Dict]:
     """
@@ -179,11 +63,23 @@ def query_llm_offline(questions: List[str], model: str, instruction: str,
         THINK_END_TOKEN_ID = tokenizer.encode("</think>", add_special_tokens=False)[0]
         print(THINK_START_TOKEN_ID, THINK_END_TOKEN_ID)
         # Set sampling parameters
-        sampling_params = SamplingParams(temperature=0.6,
+        config = AutoConfig.from_pretrained(model, trust_remote_code=True)
+        # Convert to GenerationConfig if needed
+        gen_cfg = None
+        try:
+            gen_cfg = GenerationConfig.from_pretrained(model)
+        except Exception:
+            # Fallback: build from model config attributes
+            gen_cfg = GenerationConfig(**{k: getattr(config, k) for k in ['temperature', 'top_k', 'top_p', 'repetition_penalty'] if hasattr(config, k)})
+
+        sampling_params = SamplingParams(temperature=getattr(gen_cfg, 'temperature', 0.6),
+                                         top_p=getattr(gen_cfg, 'top_p', 0.95),
+                                         top_k=getattr(gen_cfg, 'top_k', None),
+                                         repetition_penalty=getattr(gen_cfg, 'repetition_penalty', 1.0),
                                          max_tokens=MAX_RESPONSE_LENGTH,
-                                         top_p=0.95,
                                          n=n_samples,
-                                         best_of=n_samples)
+                                         best_of=n_samples,
+                                         seed=random.randint(1, 1_000_000))
         continue_sampling_params = copy.deepcopy(sampling_params)
         continue_sampling_params.max_tokens = 256
         continue_sampling_params.n = 1
@@ -198,9 +94,9 @@ def query_llm_offline(questions: List[str], model: str, instruction: str,
             sample_responses = []
             for sample in output.outputs:
                 think_length, has_think = get_think_length(sample.token_ids,
-                                                           think_start_id=THINK_START_TOKEN_ID,
-                                                           think_end_id=THINK_END_TOKEN_ID,
-                                                           max_length=MAX_RESPONSE_LENGTH)
+                                                        think_start_id=THINK_START_TOKEN_ID,
+                                                        think_end_id=THINK_END_TOKEN_ID,
+                                                        max_length=MAX_RESPONSE_LENGTH)
                 if think_length >= MAX_RESPONSE_LENGTH:
                     sample.text += "\n</think>\n\nYeah, I think that's right.\n\n**Final Answer**\n"
                     continued_output = llm.generate(prompt + sample.text, continue_sampling_params)
@@ -256,79 +152,7 @@ def process_responses(responses: List[Dict]) -> List[Dict]:
             
     return processed
 
-async def process_api_requests(questions: List[str], model: str, instruction: str, n_samples: int = 1) -> List[Dict]:
-    """
-    Process API requests asynchronously with load balancing.
-    """
-    # Initialize server tracking
-    await initialize_server_tracking()
-    
-    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=1800)) as session:
-        # Create semaphore for rate limiting
-        semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
-        
-        async def limited_query(question: str, index: int):
-            async with semaphore:  # This limits concurrent requests
-                await asyncio.sleep(REQUEST_DELAY)  # Add delay between requests
-                return await query_llm_api_with_retry(question, session, model_dict[model], instruction, n_samples=n_samples)
-        
-        # Create tasks for all questions
-        tasks = [
-            limited_query(question, i)
-            for i, question in enumerate(questions)
-        ]
-        
-        # Process all tasks together while maintaining order
-        responses = [None] * len(questions)
-        failed_indices = []
-        
-        # Use gather to maintain order of responses
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        # Process results in order
-        for i, result in enumerate(results):
-            if isinstance(result, Exception) or result is None:
-                failed_indices.append(i)
-                responses[i] = None
-            else:
-                # Convert API response format to match our expected format
-                samples = []
-                for choice in result["choices"]:
-                    samples.append({
-                        "choices": [{
-                            "message": choice["message"]
-                        }]
-                    })
-                responses[i] = samples
-        
-        # Retry failed requests sequentially
-        if failed_indices:
-            print(f"\nRetrying {len(failed_indices)} failed requests sequentially...")
-            for idx in failed_indices:
-                question = questions[idx]
-                for attempt in range(MAX_RETRIES):
-                    delay = min(BASE_DELAY * (2 ** attempt) + random.uniform(0, 2), MAX_DELAY * 2)
-                    try:
-                        response = await query_llm_api_with_retry(question, session, model_dict[model], instruction, n_samples=n_samples)
-                        if response is not None:
-                            # Convert API response format
-                            samples = []
-                            for choice in response["choices"]:
-                                samples.append({
-                                    "choices": [{
-                                        "message": choice["message"]
-                                    }]
-                                })
-                            responses[idx] = samples
-                            print(f"Successfully retried request for question index {idx}")
-                            break
-                        await asyncio.sleep(delay)
-                    except Exception as e:
-                        print(f"Retry attempt {attempt + 1} failed for question index {idx}: {e}")
-                        if attempt == MAX_RETRIES - 1:
-                            print(f"All retries failed for question index {idx}")
-        
-        return responses
+
 
 async def async_main(dataset: str, mode: InferenceMode, model: str,
                      instruction: str, n_samples: int, tensor_parallel_size: int = 1):
@@ -348,7 +172,7 @@ async def async_main(dataset: str, mode: InferenceMode, model: str,
     # Process responses for each sample
     processed_responses = [process_responses([resp[i] for resp in responses if resp is not None]) 
                          for i in range(n_samples)]
-    
+
     # Save results
     results = {
         "questions": questions,
@@ -383,7 +207,7 @@ if __name__ == "__main__":
                       help="Name of the dataset to process")
     parser.add_argument("--mode", choices=["api", "offline"], default="offline",
                       help="Inference mode: 'api' for local server API, 'offline' for batch inference")
-    parser.add_argument("--model", default="ThinkEdit-deepseek-qwen-1.5b", choices=["deepseek-qwen-14b", "deepseek-llama3-8b", "deepseek-qwen-1.5b", "ThinkEdit-deepseek-qwen-14b", "ThinkEdit-deepseek-llama3-8b", "ThinkEdit-deepseek-qwen-1.5b"]
+    parser.add_argument("--model", default="ThinkEdit-deepseek-qwen-1.5b",
                       help="Name of the model to use")
     parser.add_argument("--instruction", default="")
     parser.add_argument("--ports", type=int, nargs="+", default=[8000],

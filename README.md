@@ -1,5 +1,7 @@
 # ThinkEdit
 
+2025/6/6 update: Now ThinkEdit models have better performance with 4% of short reasoning head being edited. We also provide the larger ThinkEdit-deepseek-qwen-32b model. Please see our updated paper.
+
 This is the official repository for the paper: [**ThinkEdit: Interpretable Weight Editing to Mitigate Overly Short Thinking in Reasoning Models**](https://arxiv.org/abs/2503.22048)[[project website](https://lilywenglab.github.io/ThinkEdit/)].
 
 ## Overview
@@ -34,7 +36,7 @@ First, collect the responses from the reasoning models and store them in `respon
 python generate response_gsm8k.py
 ```
 
-Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`
+Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `deepseek-qwen-32b`.
 
 ### Step 2: Extract the Reasoning Length Direction
 
@@ -45,7 +47,7 @@ python extract_thinking_length_directiongsm8k_attn.py
 python extract_thinking_length_directiongsm8k_mlp.py
 ```
 
-Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`.
+Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `deepseek-qwen-32b`.
 
 ### Step 3: Steer the reasoning length of the models
 
@@ -55,7 +57,7 @@ Finally, steer the models with the directions and observe changes in accuracy an
 python thinking_length_steering_gsm8k.py
 ```
 
-Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`.
+Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `deepseek-qwen-32b`.
 
 `--control` argument options: `thinking_length_attn`, `thinking_length_mlp`.
 
@@ -87,7 +89,7 @@ First, identify the short reasoning heads by calculating their per-head contribu
 python find_short_thinking_attn_heads.py
 ```
 
-Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`.
+Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `deepseek-qwen-32b`.
 
 This will output a list of short reasoning heads and a heatmap figure of every head's contribution.
 
@@ -99,9 +101,10 @@ Next, perform weight editing to the `o_proj` layer of the short reasoning heads 
 python get_ThinkEdit_models.py
 ```
 
-Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`.
+Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `deepseek-qwen-32b`.
 
 We have provided ThinkEdit models on the Huggingface repo:
+- `cesun/ThinkEdit-deepseek-qwen-32b`
 - `cesun/ThinkEdit-deepseek-qwen-14b`
 - `cesun/ThinkEdit-deepseek-llama3-8b`
 - `cesun/ThinkEdit-deepseek-qwen-1.5b`
@@ -116,7 +119,7 @@ Finally, evaluate the performance of the original and ThinkEdit models and store
 CUDA_VISIBLE_DEVICES={your available gpus} python evaluate_ThinkEdit_models.py
 ```
 
-Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `ThinkEdit-deepseek-qwen-14b`, `ThinkEdit-deepseek-llama3-8b`, `ThinkEdit-deepseek-qwen-1.5b`.
+Specify the `--model` argument: `deepseek-qwen-32b`, `deepseek-qwen-14b`, `deepseek-llama3-8b`, `deepseek-qwen-1.5b`, `ThinkEdit-deepseek-qwen-32b`, `ThinkEdit-deepseek-qwen-14b`, `ThinkEdit-deepseek-llama3-8b`, `ThinkEdit-deepseek-qwen-1.5b`.
 
 `--dataset` argument: `gsm8k`, `mmlu_elementary_math`, `MATH-500`, `MATH-level1`, `MATH-level5`.
 

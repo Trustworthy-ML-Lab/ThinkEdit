@@ -191,13 +191,15 @@ def main():
         "deepseek-qwen-1.5b",
         "deepseek-llama3-8b",
         "deepseek-qwen-14b",
+        "deepseek-qwen-32b"
     ]
 
     # For table comparison: each deepseek model paired with its intervened version
     model_pairs = [
+        ("deepseek-qwen-32b",  "ThinkEdit-deepseek-qwen-32b"),
         ("deepseek-qwen-14b",  "ThinkEdit-deepseek-qwen-14b"),
         ("deepseek-llama3-8b", "ThinkEdit-deepseek-llama3-8b"),
-        ("deepseek-qwen-1.5b", "ThinkEdit-deepseek-qwen-1.5b"),
+        ("deepseek-qwen-1.5b", "ThinkEdit-deepseek-qwen-1.5b")
     ]
 
     # We'll store final stats in these dictionaries, keyed by (model, dataset):
