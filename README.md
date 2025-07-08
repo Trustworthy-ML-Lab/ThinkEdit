@@ -7,7 +7,7 @@ This is the official repository for the paper: [**ThinkEdit: Interpretable Weigh
 ## Overview
 
 <p align="center">
-  <img src="./fig/overview.png" width="80%" height="80%" />
+  <img src="./fig/overview.png" width="80%" />
 </p>
 
 ## Set Up
