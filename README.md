@@ -142,7 +142,7 @@ Chung-En Sun, Ge Yan, Tsui-Wei Weng, "ThinkEdit: Interpretable Weight Editing to
 ```bibtex
 @article{ThinkEdit,
    title={ThinkEdit: Interpretable Weight Editing to Mitigate Overly Short Thinking in Reasoning Models},
-   author={Chung-En Sun, Ge Yan, Tsui-Wei Weng},
+   author={Chung-En Sun and Ge Yan and Tsui-Wei Weng},
    journal={arXiv},
    year={2025}
 }
