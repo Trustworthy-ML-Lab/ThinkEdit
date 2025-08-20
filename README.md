@@ -1,5 +1,7 @@
 # ThinkEdit
 
+2025/8/20 Update: Our paper has been accepted to EMNLP 2025 main conference!
+
 2025/6/6 update: Now ThinkEdit models have better performance with 4% of short reasoning head being edited. We also provide the larger ThinkEdit-deepseek-qwen-32b model. Please see our updated paper.
 
 This is the official repository for the paper: [**ThinkEdit: Interpretable Weight Editing to Mitigate Overly Short Thinking in Reasoning Models**](https://arxiv.org/abs/2503.22048)[[project website](https://lilywenglab.github.io/ThinkEdit/)].
