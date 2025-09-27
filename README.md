@@ -145,7 +145,7 @@ to generate the plots and tables presented in our paper. You can expect output s
 #### 1. Overall Accuracy
 
 
-| Model                            | GSM8K               | MMLU Elem. Math | MATH-Level1         | MATH-Level5         | MATH-500            |
+| Model                            | GSM8K               | MMLU Elem. Math | MATH-Lv1         | MATH-Lv5         | MATH500            |
 |---------------------------------|---------------------|----------------------|---------------------|---------------------|---------------------|
 | ds-qwen-32b               | 92.97 ± 0.39        | 95.93 ± 0.83         | **96.41 ± 0.45**    | 91.27 ± 0.53        | **91.62 ± 0.58**    |
 | **ThinkEdit-ds-qwen-32b** | **95.25 ± 0.25**    | **98.02 ± 0.31**     | 96.02 ± 0.42        | **91.31 ± 0.50**    | 91.60 ± 0.65        |
@@ -160,7 +160,7 @@ to generate the plots and tables presented in our paper. You can expect output s
 #### 2. Accuracy on Short Reasoning Cases (Top 5% / 10% / 20%)
 
 
-| Model                            | GSM8K                            | MMLU Elem. Math              | MATH-Level1                      | MATH-Level5                      | MATH-500                         |
+| Model                            | GSM8K                            | MMLU Elem. Math              | MATH-Lv1                      | MATH-Lv5                      | MATH500                         |
 |---------------------------------|---------------------------------|----------------------------------|----------------------------------|----------------------------------|----------------------------------|
 | ds-qwen-32b               | 98.31 / 97.18 / 96.20           | 97.78 / 97.03 / 95.87            | 100.00 / 100.00 / **98.97**      | 93.03 / 96.36 / 97.35            | 86.40 / 92.00 / 94.00            |
 | **ThinkEdit-ds-qwen-32b** | **98.92** / **97.71** / **97.83** | **97.78** / **97.57** / **97.20** | **100.00** / **100.00** / 98.74   | **98.03** / **98.64** / **97.99** | **92.00** / **94.40** / **95.80** |
