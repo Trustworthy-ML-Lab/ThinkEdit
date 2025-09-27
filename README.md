@@ -144,7 +144,7 @@ to generate the plots and tables presented in our paper. You can expect output s
 
 #### 1. Overall Accuracy
 
-<div style="font-size: 80%">
+<div style="font-size: 60%">
 
 | Model                            | GSM8K               | MMLU Elem. Math | MATH-Level1         | MATH-Level5         | MATH-500            |
 |---------------------------------|---------------------|----------------------|---------------------|---------------------|---------------------|
@@ -162,7 +162,7 @@ to generate the plots and tables presented in our paper. You can expect output s
 
 #### 2. Accuracy on Short Reasoning Cases (Top 5% / 10% / 20%)
 
-<div style="font-size: 80%">
+<div style="font-size: 60%">
 
 | Model                            | GSM8K                            | MMLU Elem. Math              | MATH-Level1                      | MATH-Level5                      | MATH-500                         |
 |---------------------------------|---------------------------------|----------------------------------|----------------------------------|----------------------------------|----------------------------------|
