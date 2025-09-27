@@ -162,7 +162,9 @@ async def async_main(dataset: str, mode: InferenceMode, model: str,
     # Query LLM based on selected mode
     if mode == InferenceMode.API:
         # API mode - process requests asynchronously
-        responses = await process_api_requests(questions, model, instruction, n_samples)
+        # responses = await process_api_requests(questions, model, instruction, n_samples)
+        print("⚠️ API mode is not implemented. Please use offline mode instead.")
+        return
     else:
         # Offline mode - batch process all questions
         print("Running offline batch inference...")
