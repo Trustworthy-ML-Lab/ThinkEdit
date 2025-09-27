@@ -144,6 +144,8 @@ to generate the plots and tables presented in our paper. You can expect output s
 
 #### 1. Overall Accuracy
 
+<div style="font-size: 80%">
+
 | Model                            | GSM8K               | MMLU Elem. Math | MATH-Level1         | MATH-Level5         | MATH-500            |
 |---------------------------------|---------------------|----------------------|---------------------|---------------------|---------------------|
 | deepseek-qwen-32b               | 92.97 ± 0.39        | 95.93 ± 0.83         | **96.41 ± 0.45**    | 91.27 ± 0.53        | **91.62 ± 0.58**    |
@@ -155,9 +157,12 @@ to generate the plots and tables presented in our paper. You can expect output s
 | deepseek-qwen-1.5b              | 79.15 ± 1.08        | 68.52 ± 1.56         | 93.00 ± 0.33        | **75.48 ± 0.90**    | 82.22 ± 1.29        |
 | **ThinkEdit-deepseek-qwen-1.5b**| **84.56 ± 0.79**    | **90.66 ± 0.97**     | **93.66 ± 0.62**    | 75.05 ± 0.82        | **82.24 ± 0.89**    |
 
+</div>
 ---
 
 #### 2. Accuracy on Short Reasoning Cases (Top 5% / 10% / 20%)
+
+<div style="font-size: 80%">
 
 | Model                            | GSM8K                            | MMLU Elem. Math              | MATH-Level1                      | MATH-Level5                      | MATH-500                         |
 |---------------------------------|---------------------------------|----------------------------------|----------------------------------|----------------------------------|----------------------------------|
@@ -170,6 +175,7 @@ to generate the plots and tables presented in our paper. You can expect output s
 | deepseek-qwen-1.5b              | 88.46 / 87.48 / 85.02           | 62.78 / 62.16 / 60.53            | **97.62** / 95.12 / 93.91         | 91.52 / 95.00 / 95.72            | 82.40 / 89.80 / 93.40            |
 | **ThinkEdit-deepseek-qwen-1.5b**| **92.62** / **92.90** / **92.32** | **87.78** / **88.11** / **88.67** | 95.71 / **95.58** / **96.44**     | **95.15** / **96.59** / **97.27** | **90.80** / **92.00** / **94.20** |
 
+</div>
 
 ## Cite this work
 
