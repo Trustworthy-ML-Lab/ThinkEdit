@@ -174,7 +174,7 @@ to generate the plots and tables presented in our paper. You can expect output s
 
 ## Cite this work
 
-Chung-En Sun, Ge Yan, Tsui-Wei Weng, "ThinkEdit: Interpretable Weight Editing to Mitigate Overly Short Thinking in Reasoning Models", arxiv preprint
+Chung-En Sun, Ge Yan, Tsui-Wei Weng, "ThinkEdit: Interpretable Weight Editing to Mitigate Overly Short Thinking in Reasoning Models", EMNLP 2025
 
 ```bibtex
 @article{ThinkEdit,
