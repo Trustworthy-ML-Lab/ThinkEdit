@@ -109,10 +109,10 @@ python get_ThinkEdit_models.py
 Specify the `--model` argument: `deepseek-qwen-1.5b`, `deepseek-llama3-8b`, `deepseek-qwen-14b`, `deepseek-qwen-32b`.
 
 We have provided ThinkEdit models on the Huggingface repo:
-- `cesun/ThinkEdit-deepseek-qwen-32b`
-- `cesun/ThinkEdit-deepseek-qwen-14b`
-- `cesun/ThinkEdit-deepseek-llama3-8b`
-- `cesun/ThinkEdit-deepseek-qwen-1.5b`
+- [cesun/ThinkEdit-deepseek-qwen-32b](https://huggingface.co/cesun/ThinkEdit-deepseek-qwen-32b)
+- [cesun/ThinkEdit-deepseek-qwen-14b](https://huggingface.co/cesun/ThinkEdit-deepseek-qwen-14b)
+- [cesun/ThinkEdit-deepseek-llama3-8b](https://huggingface.co/cesun/ThinkEdit-deepseek-llama3-8b)
+- [cesun/ThinkEdit-deepseek-qwen-1.5b](https://huggingface.co/cesun/ThinkEdit-deepseek-qwen-1.5b)
 
 You can skip this step and our evaluation script will directly download the models from Huggingface.
 
