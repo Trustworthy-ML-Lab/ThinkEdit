@@ -24,7 +24,7 @@ pip install -r requirements.txt
 If you want to skip all the steps and directly access the resulting output files, you can download them through:
 
 ```bash
-gdown https://drive.google.com/uc?id=135ttUxdNc4gQkmbZlpr3ecbhA3_392PE
+gdown https://drive.google.com/uc?id=1TsbkYisFvZjs5usYOkA7GgEn19Njh1Ux
 ```
 and then unzip the file
 ```bash
